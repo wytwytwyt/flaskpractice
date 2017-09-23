@@ -36,6 +36,7 @@ class Post(db.Model):
     title = db.Column(db.String(255))
     body = db.Column(db.Text)
     publish_time = db.Column(db.DateTime)
+    changed_time = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     comments = db.relationship('Comment',
                                backref='post',
