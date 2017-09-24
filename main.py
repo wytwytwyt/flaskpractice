@@ -102,7 +102,7 @@ def sidebar_data():
 def home(page=1):
     posts = Post.query.order_by(
         Post.publish_time.desc()
-    ).paginate(page, 10)
+    ).paginate(page, 5)
     recent, toptags = sidebar_data()
 
     return render_template('index.html', posts=posts, recent=recent, toptags=toptags)
@@ -110,27 +110,28 @@ def home(page=1):
 
 @app.route('/post/<int:post_id>')
 def post(post_id):
-    post = Post.query.get_or_404('post_id')
-    comments = Post.comments.order_by(Comment.date.desc()).all()
+    post = Post.query.get_or_404(post_id)
+    user = User.query.filter_by(id=post.user_id).first_or_404()
+    #comments = Post.comments.order_by(Comment.date.desc()).all()
     tags = post.tags
     recent, toptags = sidebar_data()
 
-    return render_template('post.html', post=post, comments=comments, tags=tags, recent=recent, toptags=toptags)
+    return render_template('post.html', post=post, user=user, tags=tags, recent=recent, toptags=toptags)
 
 
-@app.route('/tag/<string:tag_name>')
+@app.route('/tag/<string:tag_name>/')
 def tag(tag_name):
     tag = Tag.query.filter_by(title=tag_name).first_or_404()
-    post = tag.posts.order_by(Post.publish_time.desc()).all()
+    posts = tag.posts.order_by(Post.publish_time.desc()).all()
     recent, toptags = sidebar_data()
 
-    return render_template('tag.html', tag=tag, post=post, recent=recent, toptags=toptags)
+    return render_template('tag.html', tag=tag, posts=posts, recent=recent, toptags=toptags)
 
 
 @app.route('/user/<string:user_name>')
 def user(user_name):
     user = User.query.filter_by(username=user_name).first_or_404()
-    posts = User.posts.order_by(Post.publish_time.desc()).all()
+    posts = user.posts.order_by(Post.publish_time.desc())
     recent, toptags = sidebar_data()
 
     return render_template('user.html', user=user, posts=posts, recent=recent, toptags=toptags)

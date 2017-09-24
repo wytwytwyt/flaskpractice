@@ -1,18 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Blog{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    {% macro render_pagination(pagination, endpoint) %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    {% macro render_pagination(pagination, endpoint, page) %}
      <nav>
         <ul class="pagination">
             <li>
-                <a href="{{ url_for('home', page=pagination.prev().page) }}" aria-label="Previous">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for(endpoint, page=pagination.prev().page) }}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
+                {% else %}
+                <a href="" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+                {% endif %}
             </li>
             {% for page in pagination.iter_pages() %}
               {% if page %}
@@ -32,7 +38,7 @@
               {% endif %}
             {% endfor %}
             <li>
-                <a href="{{ url_for('home', page=pagination.next().page) }}" aria-label="Next">
+                <a href="{{ url_for(endpoint, page=pagination.next().page) }}" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

@@ -1,5 +1,5 @@
 class Config(object):
-    pass
+    SECRET_KEY = 'e3f40293dd2c06088dc7c27400573967'
 
 
 class ProdConfig(Config):
