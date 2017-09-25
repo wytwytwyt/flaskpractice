@@ -2,7 +2,10 @@ from flask import Flask, render_template
 from config import DevConfig
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-
+from flask_wtf import Form
+from wtforms import StringField, TextAreaField
+from wtforms.validators import DataRequired, Length
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(DevConfig)
@@ -80,6 +83,14 @@ class Comment(db.Model):
         return '<Comment: {}>'.format(self.text[:15])
 
 
+'''表单'''
+
+
+class CommentForm(Form):
+    name = StringField('Name', validators=[DataRequired(), Length(max=20)])
+    text = TextAreaField(u'Comment', validators=[DataRequired()])
+
+
 '''视图函数'''
 
 
@@ -108,15 +119,32 @@ def home(page=1):
     return render_template('index.html', posts=posts, recent=recent, toptags=toptags)
 
 
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=('GET', 'POST'))
 def post(post_id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        new_comment = Comment()
+        new_comment.name = form.name.data
+        new_comment.text = form.text.data
+        new_comment.post_id = post_id
+        new_comment.date = datetime.datetime.now()
+        db.session.add(new_comment)
+        db.session.commit()
     post = Post.query.get_or_404(post_id)
     user = User.query.filter_by(id=post.user_id).first_or_404()
-    #comments = Post.comments.order_by(Comment.date.desc()).all()
+    comments = post.comments.order_by(Comment.date.desc()).all()
     tags = post.tags
     recent, toptags = sidebar_data()
 
-    return render_template('post.html', post=post, user=user, tags=tags, recent=recent, toptags=toptags)
+    return render_template('post.html',
+                           post=post,
+                           user=user,
+                           comments=comments,
+                           tags=tags,
+                           recent=recent,
+                           toptags=toptags,
+                           form=form
+                           )
 
 
 @app.route('/tag/<string:tag_name>/')
