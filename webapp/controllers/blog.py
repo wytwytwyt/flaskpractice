@@ -1,16 +1,15 @@
 import datetime
-from os import path
-from flask import  render_template, Blueprint
+from flask import  render_template, Blueprint, redirect, url_for
 from sqlalchemy import func
 
 from webapp.models import Post, User, db, Tag, Comment, tags
-from webapp.forms import CommentForm
+from webapp.forms import CommentForm, PostForm
 
 
 blog_blueprint = Blueprint(
     'blog',
     __name__,
-    template_folder=path.join(path.pardir, 'templates', 'blog'),
+    template_folder='../templates/blog',
     url_prefix="/blog"
 )
 
@@ -87,3 +86,36 @@ def user(user_name):
     recent, toptags = sidebar_data()
 
     return render_template('user.html', user=user, posts=posts, recent=recent, toptags=toptags)
+
+
+@blog_blueprint.route('/new', methods=['GET', 'POST'])
+def new_post():
+    form = PostForm()
+
+    if form.validate_on_submit():
+        new_post = Post(form.title.data)
+        new_post.body = form.text.data
+        new_post.publish_time = datetime.datetime.now()
+        db.session.add(new_post)
+        db.session.commit()
+
+    return render_template('new.html', form=form)
+
+
+@blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_post(id):
+    post = Post.query.get_or_404(id=id)
+    form = PostForm()
+
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.text.data
+        post.publish_time = datetime.datetime.now()
+
+        db.session.add(post)
+        db.session.commit()
+
+        return redirect(url_for('.post', post_id=post.id))
+
+    form.text.data = post.body
+    return render_template('edit.html', form=form, post=post)

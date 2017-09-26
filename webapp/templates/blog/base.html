@@ -30,9 +30,15 @@
               {% endif %}
             {% endfor %}
             <li>
-                <a href="{{ url_for(endpoint, page=pagination.next().page) }}" aria-label="Next">
+                {% if pagination.has_next %}
+                <a href="{{ url_for(endpoint, page=pagination.next().page) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+                {% else %}
+                <a href="" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
+                {% endif %}
             </li>
         </ul>
      </nav>
