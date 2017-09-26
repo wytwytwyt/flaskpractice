@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <h1 class="text-center">注册</h1>
+            <form method="POST" action="{{ url_for('.register') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.username.label }}
+                    {% if form.username.errors %}
+                        {% for e in form.username.errors %}
+                            <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.username(class_='form-control') }}
+                </div>
+                <div class="form-group">
+                    {{ form.password.label }}
+                    {% if form.password.errors %}
+                        {% for e in form.password.errors %}
+                            <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.password(class_='form-control') }}
+                </div>
+                <div class="form-group">
+                    {{ form.check_password.label }}
+                    {% if form.check_password.errors %}
+                        {% for e in form.password.errors %}
+                            <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.check_password(class_='form-control') }}
+                </div>
+                <input class="btn btn-primary" type="submit" value="注册">
+            </form>
+            <hr>
+
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+{% endblock %}

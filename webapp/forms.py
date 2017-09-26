@@ -25,7 +25,7 @@ class LoginForm(Form):
             )
             return False
 
-        if not self.user.check_password(self.password.data):
+        if not user.check_password(self.password.data):
             self.username.errors.append(
                 '用户名密码错误'
             )
@@ -36,7 +36,7 @@ class LoginForm(Form):
 class RegisterForm(Form):
     username = StringField('Username', [DataRequired(), Length(max=20)])
     password = PasswordField('Password', [DataRequired(), Length(min=8)])
-    check_password = PasswordField('Confirm Password', [DataRequired, EqualTo('password')])
+    check_password = PasswordField('Confirm Password', [DataRequired(), EqualTo('password')])
     
     def validate(self):
         check_validate = super(RegisterForm, self).validate()

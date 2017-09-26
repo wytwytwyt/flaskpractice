@@ -25,7 +25,7 @@ class User(db.Model):
         self.password = bcrypt.generate_password_hash(password)
 
     def check_password(self, password):
-        return bcrypt.check_password_hash(password)
+        return bcrypt.check_password_hash(self.password, password)
 
 
 tags = db.Table('post_tags',
