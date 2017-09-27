@@ -13,6 +13,8 @@ class LoginForm(Form):
                            )
     password = PasswordField('Password', [DataRequired()])
 
+    remember = BooleanField('记住我')
+
     def validate(self):
         check_validate = super(LoginForm, self).validate()
         if not check_validate:

@@ -3,7 +3,7 @@ from flask import Flask, redirect, url_for
 from .models import db
 from .controllers.blog import blog_blueprint
 from .controllers.main import main_blueprint
-from .extensions import bcrypt
+from .extensions import bcrypt, login_manager
 
 
 def create_app(object_name):
@@ -12,6 +12,7 @@ def create_app(object_name):
 
     db.init_app(app)
     bcrypt.init_app(app)
+    login_manager.init_app(app)
 
     @app.route('/')
     def index():

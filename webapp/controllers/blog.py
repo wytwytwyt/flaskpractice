@@ -1,6 +1,7 @@
 import datetime
 from flask import  render_template, Blueprint, redirect, url_for
 from sqlalchemy import func
+from flask_login import login_required, current_user
 
 from webapp.models import Post, User, db, Tag, Comment, tags
 from webapp.forms import CommentForm, PostForm
@@ -89,6 +90,7 @@ def user(user_name):
 
 
 @blog_blueprint.route('/new', methods=['GET', 'POST'])
+@login_required
 def new_post():
     form = PostForm()
 
@@ -96,6 +98,7 @@ def new_post():
         new_post = Post(form.title.data)
         new_post.body = form.text.data
         new_post.publish_time = datetime.datetime.now()
+        new_post.user = current_user
         db.session.add(new_post)
         db.session.commit()
 
@@ -103,6 +106,7 @@ def new_post():
 
 
 @blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_post(id):
     post = Post.query.get_or_404(id=id)
     form = PostForm()
