@@ -1,5 +1,6 @@
-from flask import Blueprint, redirect, url_for,render_template, flash
+from flask import Blueprint, redirect, url_for,render_template, flash, current_app
 from flask_login import login_user, logout_user
+from flask_principal import Identity, AnonymousIdentity, identity_changed
 from ..forms import LoginForm, RegisterForm
 from ..models import User
 from webapp import db
@@ -23,9 +24,25 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         login_user(user, remember=form.remember.data)
+
+        identity_changed.send(
+            current_app._get_current_object(),
+            identity=Identity(user.id)
+        )
         flash("登录成功", category="success")
         return redirect(url_for('blog.home'))
     return render_template('login.html', form=form)
+
+
+@main_blueprint.route('/logout', methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    identity_changed.send(
+        current_app._get_current_object(),
+        identity=AnonymousIdentity()
+    )
+    flash("退出登录成功", category="success")
+    return redirect(url_for('.login'))
 
 
 @main_blueprint.route('/register', methods=['GET', 'POST'])

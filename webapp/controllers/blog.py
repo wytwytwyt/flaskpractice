@@ -1,10 +1,12 @@
 import datetime
-from flask import  render_template, Blueprint, redirect, url_for
+from flask import  render_template, Blueprint, redirect, url_for, abort
 from sqlalchemy import func
 from flask_login import login_required, current_user
+from flask_principal import Permission, UserNeed
 
 from webapp.models import Post, User, db, Tag, Comment, tags
 from webapp.forms import CommentForm, PostForm
+from webapp.extensions import poster_permission, admin_permission
 
 
 blog_blueprint = Blueprint(
@@ -107,19 +109,24 @@ def new_post():
 
 @blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@poster_permission.require(http_exception=403)
 def edit_post(id):
-    post = Post.query.get_or_404(id=id)
-    form = PostForm()
+    post = Post.query.get_or_404(id)
+    permission = Permission(UserNeed(post.user.id))
 
-    if form.validate_on_submit():
-        post.title = form.title.data
-        post.body = form.text.data
-        post.publish_time = datetime.datetime.now()
+    if permission.can() or admin_permission.can():
+        form = PostForm()
 
-        db.session.add(post)
-        db.session.commit()
+        if form.validate_on_submit():
+            post.title = form.title.data
+            post.body = form.text.data
+            post.publish_time = datetime.datetime.now()
 
-        return redirect(url_for('.post', post_id=post.id))
+            db.session.add(post)
+            db.session.commit()
 
-    form.text.data = post.body
-    return render_template('edit.html', form=form, post=post)
+            return redirect(url_for('.post', post_id=post.id))
+
+        form.text.data = post.body
+        return render_template('edit.html', form=form, post=post)
+    abort(403)

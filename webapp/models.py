@@ -5,6 +5,11 @@ from .extensions import bcrypt
 
 db = SQLAlchemy()
 
+roles = db.Table('role_users',
+                 db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+                 db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+                 )
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +20,11 @@ class User(db.Model):
         backref='user',
         lazy='dynamic'
     )
+
+    roles = db.relationship('Role',
+                            secondary=roles,
+                            backref=db.backref('users', lazy='dynamic')
+                            )
 
     def __init__(self, username):
         self.username = username
@@ -96,3 +106,15 @@ class Comment(db.Model):
 
     def __repr__(self):
         return '<Comment: {}>'.format(self.text[:15])
+
+
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Role: {}>'.format(self.name)
